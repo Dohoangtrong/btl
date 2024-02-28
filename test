@@ -3,9 +3,9 @@ import sys
 import random
 import math
 
-WIDTH, HEIGHT = 400, 400
-SIZE = 5
-CELL_SIZE = 80
+WIDTH, HEIGHT = 600, 600
+SIZE = 20
+CELL_SIZE = 30
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 
@@ -83,27 +83,22 @@ class RectMaze:
         self.screen = screen
 
     def create_maze(self):
-
         pr = PrimsRandomized()
         mst = pr.prims_mst()
-
         for row in range(self.size):
             for col in range(self.size):
                 rowLen = row * self.sideLen
-                colLen
+                colLen = col * self.sideLen
                 node = row * self.size + col
-                if mst[node][pr.TOP] == 1:
-                    print(1)
-                    pygame.draw.line(self.screen, BLACK, (row, col), (row, col + self.sideLen))
-                if mst[node][pr.RIGHT] == 1 or node == self.size ** 2 - 1:
-                    print(2)
-                    pygame.draw.line(self.screen, BLACK, (row, col), (row + self.sideLen, col))
-                if mst[node][pr.BOTTOM] == 1:
-                    print(3)
-                    pygame.draw.line(self.screen, BLACK, (row, col), (row, col + self.sideLen))
-                if mst[node][pr.LEFT] == 1 or node == 0:
-                    print(4)
-                    pygame.draw.line(self.screen, BLACK, (row, col), (row + self.sideLen, col))
+                #print(mst[node])
+                if mst[node][pr.TOP] == 0:
+                    pygame.draw.line(self.screen, BLACK, (colLen, rowLen), (colLen + self.sideLen, rowLen ))
+                if mst[node][pr.RIGHT] == 0:
+                    pygame.draw.line(self.screen, BLACK, (colLen + self.sideLen, rowLen), (colLen + self.sideLen, rowLen + self.sideLen))
+                if mst[node][pr.BOTTOM] == 0:
+                    pygame.draw.line(self.screen, BLACK, (colLen, rowLen + self.sideLen), (colLen + self.sideLen, rowLen + self.sideLen))
+                if mst[node][pr.LEFT] == 0:
+                    pygame.draw.line(self.screen, BLACK, (colLen, rowLen), (colLen, rowLen + self.sideLen))
 
 def main():
     pygame.init()
@@ -113,24 +108,24 @@ def main():
     running = True
 
     screen.fill(WHITE)
-    #draw_grid(screen)
     rm = RectMaze(screen)
     rm.create_maze()
+
+    grid_state = [[0 for _ in range(SIZE)] for _ in range(SIZE)]
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  # Kiểm tra xem người dùng nhấp chuột trái
+                if event.button == 1:  
                     pos = pygame.mouse.get_pos()
                     clicked_row = pos[1] // CELL_SIZE
                     clicked_col = pos[0] // CELL_SIZE
-                    # Đảm bảo vị trí không vượt quá kích thước của ma trận
-                    #if clicked_row < ROWS and clicked_col < COLS:
-                        # Đặt trạng thái của ô tại vị trí này là 1
-                        #grid_state[clicked_row][clicked_col] = 1
+                    if clicked_row < SIZE and clicked_col < SIZE:
+                        grid_state[clicked_row][clicked_col] = 1
 
-        #draw_cells(screen, grid_state)
+        draw_cells(screen, grid_state)
         pygame.display.flip()
         clock.tick(30)
 
@@ -148,7 +143,7 @@ def draw_cells(screen, grid_state):
         for col in range(SIZE):
             if grid_state[row][col] == 1:
                 # Tô một chấm đỏ tại vị trí ô này
-                pygame.draw.circle(screen, (255, 0, 0), (col * CELL_SIZE[0] + CELL_SIZE[0] // 2, row * CELL_SIZE[1] + CELL_SIZE[1] // 2), 10)
+                pygame.draw.circle(screen, (255, 0, 0), (col * CELL_SIZE + CELL_SIZE // 2, row * CELL_SIZE + CELL_SIZE // 2), 10)
 
 if __name__ == "__main__":
     main()
