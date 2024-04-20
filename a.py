@@ -4,12 +4,14 @@ import random
 import math
 import time
 
-WIDTH, HEIGHT = 150, 150
-SIZE = 5
+SIZE = 20
 CELL_SIZE = 30
+WIDTH, HEIGHT = SIZE*CELL_SIZE, SIZE*CELL_SIZE
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+COLOR = (128,128,0)
 graph = [[] for _ in range (SIZE*SIZE)]
+FPS = 60
 
 class PrimsRandomized:
     def __init__(self):
@@ -106,8 +108,7 @@ class RectMaze:
                 
 
 class DFS:
-    def __init__(self, maze, screen, start, end):
-        self.maze = maze
+    def __init__(self, screen, start, end):
         self.screen = screen
         self.start = start
         self.end = end
@@ -115,21 +116,36 @@ class DFS:
     def run_dfs(self):
         dfs(self.start, self.end, self.screen)
     
-l = []
 
-def dfs(start, end, screen, visited=None):
-    if ( start == end ): return
-    if visited is None:
-        visited = set()
-    visited.add(start)
-    for neighbor in graph[start]:
-        if neighbor not in visited:
-            pr = (start,neighbor)
-            l.append(pr)
-            dfs(neighbor, end, screen, visited)
+def dfs(start, end, screen):
+    visited = set() 
+    stack = [[0,start]]
+    while stack:
+        vertex = stack.pop()
+        if vertex[1] == end: 
+            draw_line(screen,vertex[1],COLOR)
+            pygame.display.flip()
+            time.sleep(0.05)
+            break
+        print(vertex[0], vertex[1])
+        if vertex[1] not in visited:
+            visited.add(vertex[1])
+            stack.append([vertex[0],vertex[1]])  
+            for neighbor in graph[vertex[1]]:
+                if neighbor not in visited:
+                    stack.append([vertex[1],neighbor])
+            draw_line(screen,stack[-1][0],COLOR)
+            pygame.display.flip()
+            time.sleep(0.05)
+        else:
+            draw_line(screen,vertex[1],COLOR)
+            pygame.display.flip()
+            time.sleep(0.05)
+            draw_line(screen,vertex[1],WHITE)
+            pygame.display.flip()
+            time.sleep(0.05)
+            
 
-    
-        
 
 def main():
     pygame.init()
@@ -142,58 +158,24 @@ def main():
     rm = RectMaze(screen)
     rm.create_maze()
 
-    ck = 0
-    grid_state = [[0 for _ in range(SIZE)] for _ in range(SIZE)]
     while running:
-
-        dfs = DFS(grid_state,screen, 0, 15)
-        dfs.run_dfs()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            #elif event.type == pygame.MOUSEBUTTONDOWN and checkEnough < 2:
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  
-
-                    pos = pygame.mouse.get_pos()
-                    clicked_row = pos[1] // CELL_SIZE
-                    clicked_col = pos[0] // CELL_SIZE
-                    if clicked_row < SIZE and clicked_col < SIZE:
-                        grid_state[clicked_row][clicked_col] = 1
-        if ( ck == 0 ):
-            ck = 1
-            cnt = 1
-            for i in l:
-                key, value = i
-                draw_line(screen,key,value)
-                time.sleep(1)
-                pygame.display.flip()
-                print(cnt)
-                cnt+=1
-
-        draw_cells(screen, grid_state)
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                dfs = DFS(screen, 0, SIZE**2 - 1)
+                dfs.run_dfs()
+        
         pygame.display.flip()
-        clock.tick(30)
+        clock.tick(FPS)
 
     pygame.quit()
     sys.exit()
 
-def draw_cells(screen, grid_state):
-    for row in range(SIZE):
-        for col in range(SIZE):
-            if grid_state[row][col] == 1:
-                pygame.draw.circle(screen, (255, 0, 0), (col * CELL_SIZE + CELL_SIZE // 2, row * CELL_SIZE + CELL_SIZE // 2), 10)
-
-def draw_line(screen, start, end):
-    x_start = start // SIZE * CELL_SIZE + CELL_SIZE // 2 
-    y_start = start % SIZE * CELL_SIZE + CELL_SIZE // 2 
-    x_end = end // SIZE * CELL_SIZE + CELL_SIZE // 2 
-    y_end = end % SIZE * CELL_SIZE + CELL_SIZE // 2 
-    pygame.draw.line(screen, (128,128,0), (y_start, x_start), (y_end, x_end), 6)
-    pygame.draw.circle(screen, (128,128,0), (y_start, x_start), 8)
-    pygame.draw.circle(screen, (128,128,0), (y_end, x_end), 8)
+def draw_line(screen, dot, color):      
+    x_dot = dot // SIZE * CELL_SIZE + CELL_SIZE // 2 
+    y_dot = dot % SIZE * CELL_SIZE + CELL_SIZE // 2 
+    pygame.draw.circle(screen, color, (y_dot, x_dot), 8)
 
 if __name__ == "__main__":
     main()
-
-
