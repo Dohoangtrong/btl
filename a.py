@@ -4,7 +4,7 @@ import random
 import math
 import time
 
-SIZE = 20
+SIZE = 10
 CELL_SIZE = 30
 WIDTH, HEIGHT = SIZE*CELL_SIZE, SIZE*CELL_SIZE
 WHITE = (255, 255, 255)
@@ -119,15 +119,14 @@ class DFS:
 
 def dfs(start, end, screen):
     visited = set() 
-    stack = [[0,start]]
+    stack = [[start,start]]
     while stack:
         vertex = stack.pop()
         if vertex[1] == end: 
             draw_line(screen,vertex[1],COLOR)
             pygame.display.flip()
-            time.sleep(0.05)
+            time.sleep(0.03)
             break
-        print(vertex[0], vertex[1])
         if vertex[1] not in visited:
             visited.add(vertex[1])
             stack.append([vertex[0],vertex[1]])  
@@ -136,14 +135,14 @@ def dfs(start, end, screen):
                     stack.append([vertex[1],neighbor])
             draw_line(screen,stack[-1][0],COLOR)
             pygame.display.flip()
-            time.sleep(0.05)
+            time.sleep(0.03)
         else:
             draw_line(screen,vertex[1],COLOR)
             pygame.display.flip()
-            time.sleep(0.05)
+            time.sleep(0.03)
             draw_line(screen,vertex[1],WHITE)
             pygame.display.flip()
-            time.sleep(0.05)
+            time.sleep(0.03)
             
 
 
@@ -157,15 +156,32 @@ def main():
     screen.fill(WHITE)
     rm = RectMaze(screen)
     rm.create_maze()
-
+    grid_state = [[0 for _ in range(SIZE)] for _ in range(SIZE)]
+    start, end, check = 0, SIZE**2 - 1, 1 
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                dfs = DFS(screen, 0, SIZE**2 - 1)
+                dfs = DFS(screen, start, end)
                 dfs.run_dfs()
-        
+            elif event.type == pygame.MOUSEBUTTONDOWN and check != 2:
+                if event.button == 1:
+                    pos = pygame.mouse.get_pos()
+                    clicked_row = pos[1] // CELL_SIZE
+                    clicked_col = pos[0] // CELL_SIZE
+                    dot = clicked_row * SIZE + clicked_col 
+                    if check == 1: 
+                        start = dot
+                        check = 0
+                    else: 
+                        end = dot
+                        check = 2
+                    if clicked_row < SIZE and clicked_col < SIZE:
+                        grid_state[clicked_row][clicked_col] = 1
+                        draw_line(screen,dot,BLACK)
+                        pygame.display.flip()
+
         pygame.display.flip()
         clock.tick(FPS)
 
