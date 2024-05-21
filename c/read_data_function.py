@@ -22,8 +22,3 @@ def get_year_movie(text):
     list_year_movie = list_movie['year'].values
     return list_year_movie
 
-
-def get_dataframe_movies_csv(text):
-    movie_cols = ['movie_id', 'title', 'genres']
-    movies = pandas.read_csv(text, sep=',', names=movie_cols, encoding='latin-1')
-    return movies
